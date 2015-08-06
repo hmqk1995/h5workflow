@@ -1,0 +1,11 @@
+extends ../base
+
+block title
+	title 8月约啥
+block append content
+	include ../pagelets/loading.jade
+	include ../pagelets/orientation_set.jade
+	div#slide
+		img#weixinShareImg(src="images/share.jpg")
+	script(src="./script/index.js")
+	script(src="./script/share_analytics.js")
