@@ -1,21 +1,22 @@
 /** Created By Luke on 30th July, 2015 **/
-var gulp = require('gulp');
+var gulp   = require('gulp');
 var prompt = require('prompt');
 var mkdirp = require('mkdirp');
-/**
-  *
-  * 生成新的项目目录
-  *
- **/
+
 gulp.task('new', ['filename'], function(){
 
 });
 
 gulp.task('filename', function(){
-    setTimeout(function(){
+	/******************
+	  *
+	  * 生成新的项目目录
+	  *
+	 ******************/
+	function createFolder(){
+	  console.log('*********输入项目信息*********');
 	  var prompt = require('prompt');
 	  prompt.start();
-	  console.log('*********输入项目信息*********');
 	  prompt.get(['filename', 'author'], function (err, result) {
 	  	var filename = result.filename,
 	  		author   = result.author,
@@ -31,12 +32,30 @@ gulp.task('filename', function(){
 	    console.log('  项目作者: ' + author);
 	    console.log('  创建时间: ' + year + month + day);
 
-	    mkdirp('./projects/' + filename + '_' + year + month + day , function (err) {
+	    var filePath = './projects/' + filename + '_' + year + month + day;
+	    mkdirp(filePath, function (err) {
 	      if (err) console.error(err);
 		});
 	  });
-	}, 100);
+	}
+    setTimeout(createFolder, 100);
 });
+
+/******************
+  *
+  * 渲染模板
+  *
+ ******************/
+ gulp.task('render', function(){
+  var jade        = require('gulp-jade');
+  var YOUR_LOCALS = {};
+
+  gulp.src('./lib/*.jade')
+    .pipe(jade({
+      locals: YOUR_LOCALS
+    }))
+    .pipe(gulp.dest('./dist/'));
+ });
 
 
 

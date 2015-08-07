@@ -88,7 +88,16 @@ module.exports = generators.Base.extend({
     installPackage: function () {
       this.log(tPanel('  ********* 开始安装npm包 *********\n' +
         '  如果安装失败请自行在项目目录运行npm install'));
-      this.npmInstall();
+      // this.npmInstall('package.json', function () {
+      //   console.log(tPanel('  ********* 安装npm包安装完成 *********\n'));
+      // });
+      this.installDependencies({
+        bower: false,
+        npm: true,
+        callback: function () {
+          console.log(tPanel('Everything is ready!'));
+        }
+      });
     }
   }
 });
