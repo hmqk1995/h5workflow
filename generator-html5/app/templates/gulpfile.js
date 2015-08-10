@@ -1,8 +1,4 @@
-/****************************************
-  *
-  * Created By Luke on 6th August, 2015 
-  *
-  ***************************************/
+// Created By Luke on 6th August, 2015 
 
 var gulp = require('gulp');
 var sourcemaps = require('gulp-sourcemaps');
@@ -13,28 +9,32 @@ var sourcemaps = require('gulp-sourcemaps');
   *
   ***************************************/
 
- // 开发环境目录
- var SRC  = '/src/';
- // 上线环境目录
- var DIST = '/dist/';
+ // 开发环境目录 (不建议修改)
+ var SRC  = 'src/';
+ // 上线环境目录 (不建议修改)
+ var DIST = './dist/';
+ // 模板文件目录 (不建议修改)
+ var TMP  = './tmp/';
 
 function config(path) {
  var config = {
- 	path:    path,
+  path:    path,
 
- 	// SASS文件目录
- 	css:     path + 'css/',
- 	// 主要SASS文件名（仅编译主文件，其他请通过@import引入）
- 	cssName: 'style.scss',
- 	// 图片目录
- 	img:     path + 'images/',
- 	// JavaScript文件目录
- 	js:      path + 'javascripts/',
- 	// 待处理的JavaScript文件（请按文件引入顺序存放）
- 	jsFile:  ['zepto.min.js',
-			  'wx.js',
-			  'wxbridge.js',
-			  'main.js']
+  // SASS文件目录
+  css:     path + 'stylesheets/',
+  // 主要SASS文件名（仅编译主文件，其他请通过@import引入）
+  cssName: 'style.scss',
+  // 图片目录
+  img:     path + 'images/',
+  // JavaScript文件目录
+  js:      path + 'javascripts/',
+  // 待处理的JavaScript文件（请按文件引入顺序存放）
+  jsFile:  ['zepto.min.js',
+        'wx.js',
+        'wxbridge.js',
+        'wx_config.js',
+        'main.js',
+        'ga.js']
  };
  return config;
 };
@@ -50,7 +50,7 @@ function config(path) {
   *
   ***************************************/
 gulp.task('default', ['sass', 'uglifyjs', 'imagemin', 'jade'], 
-	function () {
+  function () {
 
 });
 
@@ -60,15 +60,15 @@ gulp.task('default', ['sass', 'uglifyjs', 'imagemin', 'jade'],
   *
   ***************************************/
 gulp.task('sass', function() {
-	var sass         = require('gulp-ruby-sass');
-	var autoprefixer = require('gulp-autoprefixer');
-	return sass(configSrc.css + configSrc.cssName, {sourcemap: true})
-	  .on('error', function(err) { //当错误时抛出错误信息
-	  	console.error('error', err.message);
-	  })
-	  .pipe(autoprefixer())
-	  .pipe(sourcemaps.write())
-	  .pipe(gulp.dest(configDist.css));
+  var sass         = require('gulp-ruby-sass');
+  var autoprefixer = require('gulp-autoprefixer');
+  return sass(configSrc.css + configSrc.cssName, {sourcemap: true})
+    .on('error', function(err) { //当错误时抛出错误信息
+      console.error('error', err.message);
+    })
+    .pipe(autoprefixer())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest(configDist.css));
 });
 
 /****************************************
@@ -77,17 +77,22 @@ gulp.task('sass', function() {
   *
   ***************************************/
 gulp.task('uglifyjs', function(){
-	var uglify = require('gulp-uglify');
-	var src    = configSrc.js;
-	var jsArr  = configSrc.jsFile;
-	var concat = require('gulp-concat');
+  var uglify = require('gulp-uglify');
+  var src    = configSrc.js;
+  var jsArr  = configSrc.jsFile;
+  var concat = require('gulp-concat');
 
-	for (var i=0, len = jsArr.length; i<len; i++) {
-		jsArr[i] = src + jsArr[i];
-	}
-	console.log(jsArr);
+  //克隆jsArr数组
+  var _jsArr = jsArr.concat();
+  for (var i=0, len = _jsArr.length; i<len; i++) {
+    _jsArr[i] = src + _jsArr[i];
+  }
 
-	return gulp.src(jsArr)
+  // jsArr.unshift( TMP + 'javascripts/require/require.js');
+  // jsArr.push( TMP + 'javascripts/*.js');
+  console.log(_jsArr);
+
+  return gulp.src(_jsArr)
       .pipe(uglify())
       .pipe(concat('all.js'))
       .pipe(sourcemaps.write())
@@ -100,14 +105,16 @@ gulp.task('uglifyjs', function(){
   *
   ***************************************/
 gulp.task('imagemin', function() {
-	var imagemin = require('gulp-imagemin');
-	var pngquant = require('imagemin-pngquant');
-	return gulp.src(configSrc.img + '*')
-        .pipe(imagemin({
+  var cache    = require('gulp-cache');
+  var imagemin = require('gulp-imagemin');
+  var pngquant = require('imagemin-pngquant');
+  return gulp.src([configSrc.img + '*',
+                   TMP + 'images/' + '*'])
+        .pipe(cache(imagemin({
             progressive: true,
             svgoPlugins: [{removeViewBox: false}],
             use: [pngquant()]
-        }))
+        })))
         .pipe(gulp.dest(configDist.img));
 });
 
@@ -120,10 +127,41 @@ gulp.task('jade', function() {
   var jade   = require('gulp-jade');
   var YOUR_LOCALS = {};
 
-  gulp.src(configSrc.path + 'base.jade')
+  gulp.src(configSrc.path + 'index.jade')
     .pipe(jade({
       locals: YOUR_LOCALS,
       pretty: true
     }))
     .pipe(gulp.dest(configDist.path))
+    .pipe(connect.reload());
+});
+
+/****************************************
+  *
+  * 启动服务
+  *
+  ***************************************/
+var livereload   = require('gulp-livereload'),
+    connect      = require('gulp-connect');
+
+gulp.task('server', ['watch'], function() {
+  return connect.server({
+        root: [ 'dist' ],
+        livereload: true
+    });
+});
+
+gulp.task('watch', function () {
+  gulp.watch([configSrc.path + '*.jade',
+              configSrc.path + '*.html',
+              TMP + 'jade/*.jade'], 
+              ['jade']).on('change', livereload.changed);
+  gulp.watch([configSrc.js + '*.js'],
+              ['uglifyjs']).on('change', livereload.changed);
+  gulp.watch([configSrc.path + '**', 
+              TMP + '**']).on('change', livereload.changed);
+  gulp.watch([configSrc.img + '**', 
+              TMP + 'images/**'],
+             ['imagemin']).on('change', livereload.changed);
+  livereload.listen();
 });

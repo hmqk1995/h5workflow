@@ -2,12 +2,14 @@
   *
   * Created By Luke on 30th July, 2015 
   *
-  ***************************************/
+  ***************************************/  
 'use strict';
 var generators = require('yeoman-generator');
 var chalk      = require('chalk');
 var mkdirp     = require('mkdirp');
 
+// 问题的回答
+var _answers = {};
 // 白底黑字的标题
 var tPanel = chalk.bgWhite.black;
 // 格式化年月日变量
@@ -36,7 +38,7 @@ module.exports = generators.Base.extend({
     var prompts = [{
       type    : 'input',
       name    : 'name',
-      message : '项目名称',
+      message : '项目文件夹名',
       default : 'newproj'
     },{
       type    : 'input',
@@ -45,6 +47,7 @@ module.exports = generators.Base.extend({
       default : 'author'
     }];
     this.prompt(prompts, function (answers) {
+      _answers = answers;
       this.appname = answers.name;
       var dateString = createDate();
 
@@ -54,13 +57,15 @@ module.exports = generators.Base.extend({
       this.destinationRoot(this.destinationPath('projects/' + fileSrc));
 
       done();
+
     }.bind(this));
   },
   writing: {
     packageJSON: function () {
       this.fs.copyTpl(
         this.templatePath('_package.json'),
-        this.destinationPath('package.json')
+        this.destinationPath('package.json'),
+        {author: _answers.author}
       );
     },
     templates: function () {
@@ -69,12 +74,8 @@ module.exports = generators.Base.extend({
         this.destinationPath('tmp/')
       );
       this.fs.copyTpl(
-        this.templatePath('base.jade'),
-        this.destinationPath('src/base.jade')
-      );
-      this.fs.copyTpl(
-        this.templatePath('home.jade'),
-        this.destinationPath('src/home.jade')
+        this.templatePath('src'),
+        this.destinationPath('src/')
       );
       this.fs.copyTpl(
         this.templatePath('.gitignore'),

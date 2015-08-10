@@ -2,16 +2,15 @@ doctype html
 html
     head
         // meta
-        include ./pagelets/head/meta.jade
+        include meta
         block meta
         // 标题
         block title
             title 活动模板
         // 默认样式
-        include ./pagelets/head/style.jade
+        include style
         block style
-        // 默认脚本
-        include ./pagelets/head/headscript.jade
-        block headscript
     body
         block content
+        // 默认脚本
+        include headscript
