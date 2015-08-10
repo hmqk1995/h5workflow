@@ -26,7 +26,8 @@ Generatored by Yeoman and Gulp.
     
 * 文件配置（位于gulpfile.js文件中）
 
-* 生成的目录 
+* 生成的目录
+
 <pre>
 -- src
   | -- images
