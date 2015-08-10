@@ -28,20 +28,18 @@ Generatored by Yeoman and Gulp.
 
 * 生成的目录
 
-<pre>
--- src
-  | -- images
-  | -- stylesheets
-       ｜style.scss   //主要css写在这里，如需新建其他css文件请在此文件中通过@import引入
-  | -- javascripts  //需要用到的js文件都复制到该目录下
-       | main.js      //主要js文件写在这里
-  | index.jade      //html主文件
--- tmp
-  | -- images       //公用图片
-  | -- jade         //公用模板
-  | -- stylesheets  //公用样式
-  | -- javascripts  //一些预置的js文件，如需使用请复制到src/javascripts目录下
-</pre>
+	-- src
+	  | -- images
+	  | -- stylesheets
+	       ｜style.scss   //主要css写在这里，如需新建其他css文件请在此文件中通过@import引入
+	  | -- javascripts  //需要用到的js文件都复制到该目录下
+	       | main.js      //主要js文件写在这里
+	  | index.jade      //html主文件
+	-- tmp
+	  | -- images       //公用图片
+	  | -- jade         //公用模板
+	  | -- stylesheets  //公用样式
+	  | -- javascripts  //一些预置的js文件，如需使用请复制到src/javascripts目录下
 
 需要使用的js文件请在gulpfile.js中设置（注意引入先后顺序）
 
